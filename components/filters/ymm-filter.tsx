@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, RotateCcw, Search } from "lucide-react";
+import { ChevronDown, RotateCcw, Search, Loader2 } from "lucide-react";
 import type { Make, Model } from "@/types/catalog";
 
 export function YmmFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const [makes, setMakes] = useState<Make[]>([]);
   const [models, setModels] = useState<Model[]>([]);
@@ -97,13 +98,18 @@ export function YmmFilter() {
       if (clearKeys) {
         clearKeys.forEach((k) => params.delete(k));
       }
-      router.push(`/?${params.toString()}`);
+      const newUrl = `/?${params.toString()}`;
+      startTransition(() => {
+        router.replace(newUrl, { scroll: false });
+      });
     },
     [router, searchParams]
   );
 
   const resetFilters = () => {
-    router.push("/");
+    startTransition(() => {
+      router.replace("/", { scroll: false });
+    });
   };
 
   const hasActiveFilters = selectedMake || selectedModel || selectedYear;
@@ -112,7 +118,11 @@ export function YmmFilter() {
     <div className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-zinc-400" />
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+          ) : (
+            <Search className="h-4 w-4 text-zinc-400" />
+          )}
           <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
             Find Parts by Vehicle
           </h3>

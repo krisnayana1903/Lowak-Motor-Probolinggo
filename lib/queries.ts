@@ -80,7 +80,9 @@ export async function getProducts(
   }
 
   if (filters?.search) {
-    query = query.ilike("title", `%${filters.search}%`);
+    query = query.or(
+      `title.ilike.%${filters.search}%,part_number.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
+    );
   }
 
   const { data, error } = await query.order("title");
@@ -149,7 +151,9 @@ async function getProductsWithFitmentFilter(
   }
 
   if (filters.search) {
-    productQuery = productQuery.ilike("title", `%${filters.search}%`);
+    productQuery = productQuery.or(
+      `title.ilike.%${filters.search}%,part_number.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
+    );
   }
 
   const { data, error } = await productQuery.order("title");

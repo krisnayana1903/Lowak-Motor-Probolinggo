@@ -2,8 +2,10 @@ import { Suspense } from "react";
 import { Bike, Shield, Globe, Headphones } from "lucide-react";
 import { getProducts, getCategories } from "@/lib/queries";
 import { YmmFilter } from "@/components/filters/ymm-filter";
+import { SearchBar } from "@/components/filters/search-bar";
 import { ProductGrid } from "@/components/catalog/product-grid";
 import { ProductSkeletonGrid } from "@/components/catalog/product-skeleton";
+import { CategoryPills } from "@/components/filters/category-pills";
 import type { CatalogFilters } from "@/types/catalog";
 
 interface PageProps {
@@ -14,7 +16,7 @@ async function CatalogResults({ filters }: { filters: CatalogFilters }) {
   const products = await getProducts(filters);
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-zinc-500">
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -84,37 +86,25 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       </section>
 
+      {/* Search Bar */}
+      <section className="mb-6">
+        <Suspense fallback={null}>
+          <SearchBar />
+        </Suspense>
+      </section>
+
       {/* Categories */}
       {categories.length > 0 && (
         <section id="categories" className="mb-8">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500">
             Browse by Category
           </h2>
-          <div className="flex flex-wrap gap-2">
-            <a
-              href="/"
-              className={`rounded-full border px-4 py-2 text-xs font-semibold transition-all ${
-                !filters.category
-                  ? "border-amber-500 bg-amber-500 text-white"
-                  : "border-zinc-200 text-zinc-600 hover:border-amber-300 hover:text-amber-600 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-amber-700"
-              }`}
-            >
-              All Parts
-            </a>
-            {categories.map((cat) => (
-              <a
-                key={cat.id}
-                href={`/?category=${cat.slug}`}
-                className={`rounded-full border px-4 py-2 text-xs font-semibold transition-all ${
-                  filters.category === cat.slug
-                    ? "border-amber-500 bg-amber-500 text-white"
-                    : "border-zinc-200 text-zinc-600 hover:border-amber-300 hover:text-amber-600 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-amber-700"
-                }`}
-              >
-                {cat.name}
-              </a>
-            ))}
-          </div>
+          <Suspense fallback={null}>
+            <CategoryPills
+              categories={categories}
+              activeCategory={filters.category}
+            />
+          </Suspense>
         </section>
       )}
 
